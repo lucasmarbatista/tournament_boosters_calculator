@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Premiação TCG - Pré-Release</title>
+    <style>
+        .tcg-calculator {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .tcg-calculator h2 {
+            text-align: center;
+            color: #333;
+        }
+    .settings-panel {
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+        }
+    .input-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 12px;
+    }
+    .input-row:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .input-row label {
+            font-weight: bold;
+            color: #555;
+        font-size: 14px;
+        }
+    .input-row input {
+            width: 80px;
+        padding: 6px;
+        font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .tcg-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: #fff;
+        }
+        .tcg-table th, .tcg-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        .tcg-table th {
+            background-color: #e23535;
+            color: white;
+            font-weight: bold;
+        }
+        .tcg-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .tcg-table input {
+            width: 60px;
+            padding: 6px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .error-message {
+            color: #d9534f;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .summary-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 6px;
+            border-left: 4px solid #0275d8;
+        }
+        .top8-calc-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+<div class="tcg-calculator">
+    <h2>Calculadora de Premiação<br>Pré-Release</h2>
+
+    <div class="settings-panel">
+        <div class="input-row">
+            <label for="playerCountMaster">Inscritos Masters:</label>
+            <input type="number" id="playerCountMaster" value="20" min="0" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="playerCountSenior">Inscritos Seniors:</label>
+            <input type="number" id="playerCountSenior" value="2" min="0" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="playerCountJunior">Inscritos Juniors:</label>
+            <input type="number" id="playerCountJunior" value="2" min="0" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="boxCountInput">Total de Boxes (36 boosters por box):</label>
+            <input type="number" id="boxCountInput" value="6" min="0" step="any" oninput="syncBoxesToBoosters()">
+        </div>
+        <div class="input-row">
+            <label for="totalBoostersInput">Total de Boosters (Pool):</label>
+            <input type="number" id="totalBoostersInput" value="216" min="0" oninput="syncBoostersToBoxes()">
+        </div>
+        <div class="input-row">
+            <label for="participationBoostersInput">Boosters de participação <br>(por pessoa):</label>
+            <input type="number" id="participationBoostersInput" value="5" min="0" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="judgeBoostersInput">Juízes/Staff<br>(Total Boosters):</label>
+            <input type="number" id="judgeBoostersInput" value="20" min="0" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="promotionBoostersInput">Promoção Traga um Amigo<br>(Total Boosters):</label>
+            <input type="number" id="promotionBoostersInput" value="0" min="0" oninput="calculatePrizes()">
+        </div>
+    </div>
+
+    <div id="errorContainer" class="error-message"></div>
+
+    <div id="resultsContainer">
+        <!-- A tabela e o resumo serão iniciados aqui -->
+    </div>
+</div>
+
+<div class="tcg-calculator">
+    <h2>Top 8/4/2 (Adicionar Sobras)</h2>
+    <table class="tcg-table">
+        <thead>
+            <tr>
+                <th>Colocação</th>
+                <th>Masters (Base+Extra)</th>
+                <th>Seniors (Base+Extra)</th>
+                <th>Juniors (Base+Extra)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1º Lugar</strong></td>
+                <td><div class="top8-calc-cell"><span id="b1M">0</span> + <input type="number" id="c1M" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t1M">0</span></strong></div></td>
+                <td><div class="top8-calc-cell"><span id="b1S">0</span> + <input type="number" id="c1S" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t1S">0</span></strong></div></td>
+                <td><div class="top8-calc-cell"><span id="b1J">0</span> + <input type="number" id="c1J" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t1J">0</span></strong></div></td>
+            </tr>
+            <tr>
+                <td><strong>2º Lugar</strong></td>
+                <td><div class="top8-calc-cell"><span id="b2M">0</span> + <input type="number" id="c2M" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t2M">0</span></strong></div></td>
+                <td><div class="top8-calc-cell"><span id="b2S">0</span> + <input type="number" id="c2S" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t2S">0</span></strong></div></td>
+                <td><div class="top8-calc-cell"><span id="b2J">0</span> + <input type="number" id="c2J" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t2J">0</span></strong></div></td>
+            </tr>
+            <tr>
+                <td><strong>3º Lugar</strong></td>
+                <td><div class="top8-calc-cell"><span id="b3M">0</span> + <input type="number" id="c3M" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t3M">0</span></strong></div></td>
+                <td><div class="top8-calc-cell"><span id="b3S">0</span> + <input type="number" id="c3S" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t3S">0</span></strong></div></td>
+                <td><div class="top8-calc-cell"><span id="b3J">0</span> + <input type="number" id="c3J" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t3J">0</span></strong></div></td>
+            </tr>
+            <tr>
+                <td><strong>4º Lugar</strong></td>
+                <td><div class="top8-calc-cell"><span id="b4M">0</span> + <input type="number" id="c4M" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t4M">0</span></strong></div></td>
+                <td><div class="top8-calc-cell"><span id="b4S">0</span> + <input type="number" id="c4S" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t4S">0</span></strong></div></td>
+                <td><div class="top8-calc-cell"><span id="b4J">0</span> + <input type="number" id="c4J" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t4J">0</span></strong></div></td>
+            </tr>
+            <tr>
+                <td>5º ao 8º Lugar (cada)</td>
+                <td><div class="top8-calc-cell"><span id="b5M">0</span> + <input type="number" id="c5M" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t5M">0</span></strong></div></td>
+                <td><div class="top8-calc-cell"><span id="b5S">0</span> + <input type="number" id="c5S" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t5S">0</span></strong></div></td>
+                <td><div class="top8-calc-cell"><span id="b5J">0</span> + <input type="number" id="c5J" value="0" min="0" oninput="calculateCustomTop8()"> = <strong><span id="t5J">0</span></strong></div></td>
+            </tr>
+        </tbody>
+    </table>
+    <div id="customTop8Result"></div>
+</div>
+</div>
+
+<script>
+    let currentTop8Pool = 0;
+    let currentCommittedBoosters = 0;
+    let currentTotalBoosters = 0;
+    let baseTop8 = { master: {}, senior: {}, junior: {} };
+
+    function getTopCut(pool, players) {
+        if (pool <= 0 || players === 0) return { first: 0, second: 0, third: 0, fourth: 0, fifthToEighth: 0, total: 0 };
+
+        let first = 0, second = 0, third = 0, fourth = 0, fifthToEighth = 0;
+
+        if (players >= 8) {
+            first = Math.round(pool * 0.437);
+            second = Math.round(pool * 0.239);
+            third = Math.round(pool * 0.110);
+            fourth = Math.round(pool * 0.110);
+            fifthToEighth = Math.round(pool * 0.026);
+        } else if (players >= 4) {
+            first = Math.round(pool * 0.50);
+            second = Math.round(pool * 0.30);
+            third = Math.round(pool * 0.10);
+            fourth = Math.round(pool * 0.10);
+        } else if (players >= 2) {
+            first = Math.round(pool * 0.70);
+            second = Math.round(pool * 0.30);
+        } else if (players === 1) {
+            first = pool;
+        }
+
+        const total = first + second + third + fourth + (fifthToEighth * 4);
+        return { first, second, third, fourth, fifthToEighth, total };
+    }
+
+    function syncBoxesToBoosters() {
+        const boxes = parseFloat(document.getElementById('boxCountInput').value) || 0;
+        document.getElementById('totalBoostersInput').value = Math.round(boxes * 36);
+        calculatePrizes();
+    }
+
+    function syncBoostersToBoxes() {
+        const boosters = parseInt(document.getElementById('totalBoostersInput').value) || 0;
+        document.getElementById('boxCountInput').value = Number((boosters / 36).toFixed(2));
+        calculatePrizes();
+    }
+
+    function calculatePrizes() {
+        const masterCount = parseInt(document.getElementById('playerCountMaster').value) || 0;
+        const seniorCount = parseInt(document.getElementById('playerCountSenior').value) || 0;
+        const juniorCount = parseInt(document.getElementById('playerCountJunior').value) || 0;
+        const playerCount = masterCount + seniorCount + juniorCount;
+
+        const totalBoosters = parseInt(document.getElementById('totalBoostersInput').value) || 0;
+        const participationBoostersPerPlayer = parseInt(document.getElementById('participationBoostersInput').value) || 0;
+        const totalJudgeBoosters = parseInt(document.getElementById('judgeBoostersInput').value) || 0;
+        const maxPromotionBoosters = parseInt(document.getElementById('promotionBoostersInput').value) || 0;
+
+        const resultsContainer = document.getElementById('resultsContainer');
+        const errorContainer = document.getElementById('errorContainer');
+
+        // Limpar resultados anteriores
+        resultsContainer.innerHTML = '';
+        errorContainer.innerHTML = '';
+
+        // Validação
+        if (playerCount < 1) {
+            errorContainer.innerHTML = 'Por favor, insira pelo menos 1 jogador.';
+            return;
+        }
+
+        // Cálculos Base
+        const totalParticipationBoosters = playerCount * participationBoostersPerPlayer;
+
+        const committedBoosters = totalParticipationBoosters + totalJudgeBoosters + maxPromotionBoosters;
+        let top8Pool = totalBoosters - committedBoosters;
+
+        if (top8Pool < 0) {
+            top8Pool = 0;
+        }
+
+        // Salva variáveis globalmente para uso no dashboard
+        currentTop8Pool = top8Pool;
+        currentCommittedBoosters = committedBoosters;
+        currentTotalBoosters = totalBoosters;
+
+        // Distribuição proporcional
+        let masterPool = playerCount > 0 ? Math.round(top8Pool * (masterCount / playerCount)) : 0;
+        let seniorPool = playerCount > 0 ? Math.round(top8Pool * (seniorCount / playerCount)) : 0;
+        let juniorPool = playerCount > 0 ? Math.round(top8Pool * (juniorCount / playerCount)) : 0;
+
+        const masterTop8 = getTopCut(masterPool, masterCount);
+        const seniorTop8 = getTopCut(seniorPool, seniorCount);
+        const juniorTop8 = getTopCut(juniorPool, juniorCount);
+
+        baseTop8.master = masterTop8;
+        baseTop8.senior = seniorTop8;
+        baseTop8.junior = juniorTop8;
+
+        const cats = [
+            { key: 'M', data: masterTop8 },
+            { key: 'S', data: seniorTop8 },
+            { key: 'J', data: juniorTop8 }
+        ];
+        cats.forEach(c => {
+            document.getElementById(`b1${c.key}`).innerText = c.data.first;
+            document.getElementById(`b2${c.key}`).innerText = c.data.second;
+            document.getElementById(`b3${c.key}`).innerText = c.data.third;
+            document.getElementById(`b4${c.key}`).innerText = c.data.fourth;
+            document.getElementById(`b5${c.key}`).innerText = c.data.fifthToEighth;
+        });
+
+        // Cálculo do total de boosters e sobras
+        const totalTop8Distributed = masterTop8.total + seniorTop8.total + juniorTop8.total;
+        const totalDistributed = committedBoosters + totalTop8Distributed;
+        const leftoverInitialPool = totalBoosters - totalDistributed;
+
+        const averageBoosters = playerCount > 0 ? (totalTop8Distributed / playerCount).toFixed(2) : "0.00";
+
+        const htmlContent = `
+            <div class="summary-box" style="font-size: 1.15em; line-height: 1.6; border-left-width: 6px; box-shadow: 0 4px 8px rgba(2, 117, 216, 0.15);">
+                <strong>Pool de Boosters (Total):</strong> <span style="color: #e23535; font-weight: bold; font-size: 1.1em;">${totalBoosters}</span><br>
+                <strong>Média de Boosters por Inscrito (Top 8/Top 4):</strong> <span style="color: #e23535; font-weight: bold; font-size: 1.1em;">${averageBoosters}</span><br>
+                <strong>Total de Inscritos:</strong> <span style="color: #e23535; font-weight: bold; font-size: 1.1em;">${playerCount}</span> <span style="font-size: 0.85em; color: #555;">(Master: <b>${masterCount}</b> | Senior: <b>${seniorCount}</b> | Junior: <b>${juniorCount}</b>)</span><br>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #b8daff; font-size: 1.2em; color: #004a99;">
+                    <strong>Destinado ao Top Global:</strong> <span style="background-color: #004a99; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${top8Pool}</span> boosters
+                </div>
+            </div>
+
+            <h3 style="text-align:center; color:#444; margin-top:20px;">Distribuição Proporcional do Top 8/4/2</h3>
+            <table class="tcg-table">
+                <thead>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Masters (${masterCount} jog.)</th>
+                        <th>Seniors (${seniorCount} jog.)</th>
+                        <th>Juniors (${juniorCount} jog.)</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Pool Categoria</strong></td><td><strong>${masterPool}</strong></td><td><strong>${seniorPool}</strong></td><td><strong>${juniorPool}</strong></td><td><strong>${masterPool + seniorPool + juniorPool}</strong></td></tr>
+                    <tr><td><strong>1º Lugar</strong></td><td>${masterTop8.first}</td><td>${seniorTop8.first}</td><td>${juniorTop8.first}</td><td>${masterTop8.first + seniorTop8.first + juniorTop8.first}</td></tr>
+                    <tr><td><strong>2º Lugar</strong></td><td>${masterTop8.second}</td><td>${seniorTop8.second}</td><td>${juniorTop8.second}</td><td>${masterTop8.second + seniorTop8.second + juniorTop8.second}</td></tr>
+                    <tr><td><strong>3º Lugar</strong></td><td>${masterTop8.third}</td><td>${seniorTop8.third}</td><td>${juniorTop8.third}</td><td>${masterTop8.third + seniorTop8.third + juniorTop8.third}</td></tr>
+                    <tr><td><strong>4º Lugar</strong></td><td>${masterTop8.fourth}</td><td>${seniorTop8.fourth}</td><td>${juniorTop8.fourth}</td><td>${masterTop8.fourth + seniorTop8.fourth + juniorTop8.fourth}</td></tr>
+                    <tr><td>5º ao 8º Lugar</td><td>${masterTop8.fifthToEighth} (cada)</td><td>${seniorTop8.fifthToEighth} (cada)</td><td>${juniorTop8.fifthToEighth} (cada)</td><td>${(masterTop8.fifthToEighth + seniorTop8.fifthToEighth + juniorTop8.fifthToEighth)} (cada)</td></tr>
+                </tbody>
+            </table>
+
+            <h3 style="text-align:center; color:#444; margin-top:20px;">Destinos Fixos</h3>
+            <table class="tcg-table">
+                <thead>
+                    <tr>
+                        <th>Destino Fixo</th>
+                        <th>Total de Boosters</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Participação (${participationBoostersPerPlayer} por insc.)</td><td>${totalParticipationBoosters}</td></tr>
+                    <tr><td>Juízes (Staff)</td><td>${totalJudgeBoosters}</td></tr>
+                    <tr><td>Promoção Traga um Amigo <br>(Total Boosters)</td><td>${maxPromotionBoosters}</td></tr>
+                </tbody>
+            </table>
+            <div class="summary-box" style="margin-top: 20px; border-left-color: ${leftoverInitialPool >= 0 ? '#5cb85c' : '#d9534f'}; background-color: ${leftoverInitialPool >= 0 ? '#eafaf1' : '#f2dede'}; font-size: 1.15em; line-height: 1.6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <strong>Total de Boosters Distribuídos no Evento:</strong> <span style="font-weight: bold; font-size: 1.1em;">${totalDistributed}</span><br>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed ${leftoverInitialPool >= 0 ? '#c3e6cb' : '#f5c6cb'}; font-size: 1.2em; color: ${leftoverInitialPool >= 0 ? '#155724' : '#721c24'};">
+                    <strong>Sobras Totais do Pool Inicial (Estoque):</strong> <span style="background-color: ${leftoverInitialPool >= 0 ? '#28a745' : '#d9534f'}; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${leftoverInitialPool}</span>
+                </div>
+            </div>
+        `;
+
+        resultsContainer.innerHTML = htmlContent;
+
+        // Atualiza a aba do top 8 para manter as sobras organizadas
+        calculateCustomTop8();
+    }
+
+    function calculateCustomTop8() {
+        const categories = ['M', 'S', 'J'];
+        const baseKeys = ['master', 'senior', 'junior'];
+        let totalExtraGlobal = 0;
+        let totalDistributedGlobal = 0;
+        let totalBaseGlobal = 0;
+
+        categories.forEach((cat, index) => {
+            const base = baseTop8[baseKeys[index]];
+
+            const extra1st = parseInt(document.getElementById(`c1${cat}`).value) || 0;
+            const extra2nd = parseInt(document.getElementById(`c2${cat}`).value) || 0;
+            const extra3rd = parseInt(document.getElementById(`c3${cat}`).value) || 0;
+            const extra4th = parseInt(document.getElementById(`c4${cat}`).value) || 0;
+            const extra5to8th = parseInt(document.getElementById(`c5${cat}`).value) || 0;
+
+            const total1st = base.first + extra1st;
+            const total2nd = base.second + extra2nd;
+            const total3rd = base.third + extra3rd;
+            const total4th = base.fourth + extra4th;
+            const total5to8th = base.fifthToEighth + extra5to8th;
+
+            document.getElementById(`t1${cat}`).innerText = total1st;
+            document.getElementById(`t2${cat}`).innerText = total2nd;
+            document.getElementById(`t3${cat}`).innerText = total3rd;
+            document.getElementById(`t4${cat}`).innerText = total4th;
+            document.getElementById(`t5${cat}`).innerText = total5to8th;
+
+            const totalExtra = extra1st + extra2nd + extra3rd + extra4th + (extra5to8th * 4);
+            const baseTotal = base.first + base.second + base.third + base.fourth + (base.fifthToEighth * 4);
+            const totalDistributed = baseTotal + totalExtra;
+
+            totalExtraGlobal += totalExtra;
+            totalBaseGlobal += baseTotal;
+            totalDistributedGlobal += totalDistributed;
+        });
+
+        const totalDistributedEvent = currentCommittedBoosters + totalDistributedGlobal;
+        const customLeftovers = currentTotalBoosters - totalDistributedEvent;
+
+        let diffHtml = '';
+        if (customLeftovers < 0) {
+            diffHtml = `<span style="color: #721c24;"><strong>Atenção:</strong> Você distribuiu <span style="background-color: #d9534f; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${Math.abs(customLeftovers)}</span> boosters a mais <br> que o Pool Máximo Inicial!</span>`;
+        } else {
+            diffHtml = `<span style="color: #155724;"><strong>Novas Sobras Totais (Estoque):</strong> <span style="background-color: #28a745; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${customLeftovers}</span> boosters</span>`;
+        }
+
+        document.getElementById('customTop8Result').innerHTML = `
+            <div class="summary-box" style="font-size: 1.15em; line-height: 1.6; border-left-width: 6px; box-shadow: 0 4px 8px rgba(2, 117, 216, 0.15);">
+                <strong>Base Top (Global):</strong> <span style="color: #e23535; font-weight: bold; font-size: 1.1em;">${totalBaseGlobal}</span> boosters<br>
+                <strong>Adicionais Distribuídos (Global):</strong> <span style="color: #e23535; font-weight: bold; font-size: 1.1em;">${totalExtraGlobal}</span> boosters<br>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #b8daff; font-size: 1.2em; color: #004a99;">
+                    <strong>Total Top Final (Global):</strong> <span style="background-color: #004a99; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${totalDistributedGlobal}</span> boosters
+                </div>
+            </div>
+            <div class="summary-box" style="margin-top: 20px; border-left-color: ${customLeftovers >= 0 ? '#5cb85c' : '#d9534f'}; background-color: ${customLeftovers >= 0 ? '#eafaf1' : '#f2dede'}; font-size: 1.15em; line-height: 1.6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <strong>Novo Total Distribuído no Evento:</strong> <span style="font-weight: bold; font-size: 1.1em;">${totalDistributedEvent}</span><br>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed ${customLeftovers >= 0 ? '#c3e6cb' : '#f5c6cb'}; font-size: 1.2em;">
+                    ${diffHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // Executa a função uma vez ao carregar a página para mostrar os dados de todos os jogadores
+    window.onload = calculatePrizes;
+</script>
+
+</body>
+</html>

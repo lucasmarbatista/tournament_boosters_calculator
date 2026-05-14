@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Premiação Torneio TCG</title>
+    <style>
+        .tcg-calculator {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .tcg-calculator h2 {
+            text-align: center;
+            color: #333;
+        }
+    .settings-panel {
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+        }
+    .input-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 12px;
+    }
+    .input-row:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .input-row label {
+            font-weight: bold;
+            color: #555;
+        font-size: 14px;
+        }
+    .input-row input {
+            width: 80px;
+        padding: 6px;
+        font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .tcg-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: #fff;
+        }
+        .tcg-table th, .tcg-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        .tcg-table th {
+            background-color: #e23535;
+            color: white;
+            font-weight: bold;
+        }
+        .tcg-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .tcg-table input {
+            width: 60px;
+            padding: 6px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .error-message {
+            color: #d9534f;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .summary-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 6px;
+            border-left: 4px solid #0275d8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+<div class="tcg-calculator">
+    <h2>Calculadora de Premiação<br>Torneio Genérico</h2>
+
+    <div class="settings-panel">
+        <div class="input-row">
+            <label for="playerCountInput">Quantidade de Inscritos:</label>
+            <input type="number" id="playerCountInput" value="20" min="8" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="entryFeeInput">Valor da Inscrição (R$):</label>
+            <input type="number" id="entryFeeInput" value="30" min="0" step="0.50" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="boosterPriceInput">Preço do Booster (R$):</label>
+            <input type="number" id="boosterPriceInput" value="12.90" min="0.1" step="0.50" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="staffCutInput">Staff e Juízes (%):</label>
+            <input type="number" id="staffCutInput" value="30" min="0" max="100" oninput="calculatePrizes()">
+        </div>
+    </div>
+
+    <div id="errorContainer" class="error-message"></div>
+
+    <div id="resultsContainer">
+        <!-- A tabela e o resumo serão injetados aqui pelo JavaScript -->
+    </div>
+</div>
+
+<div class="tcg-calculator">
+    <h2>Top 8 (Adicionar Sobras)</h2>
+    <table class="tcg-table">
+        <thead>
+            <tr>
+                <th>Colocação</th>
+                <th>Base</th>
+                <th>Adicionar Extras</th>
+                <th>Total Final</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1º Lugar</strong></td>
+                <td><span id="base1stDisplay">0</span></td>
+                <td><input type="number" id="custom1st" value="0" min="0" oninput="calculateCustomTop8()"></td>
+                <td><strong><span id="total1stDisplay">0</span></strong></td>
+            </tr>
+            <tr>
+                <td><strong>2º Lugar</strong></td>
+                <td><span id="base2ndDisplay">0</span></td>
+                <td><input type="number" id="custom2nd" value="0" min="0" oninput="calculateCustomTop8()"></td>
+                <td><strong><span id="total2ndDisplay">0</span></strong></td>
+            </tr>
+            <tr>
+                <td><strong>3º Lugar</strong></td>
+                <td><span id="base3rdDisplay">0</span></td>
+                <td><input type="number" id="custom3rd" value="0" min="0" oninput="calculateCustomTop8()"></td>
+                <td><strong><span id="total3rdDisplay">0</span></strong></td>
+            </tr>
+            <tr>
+                <td><strong>4º Lugar</strong></td>
+                <td><span id="base4thDisplay">0</span></td>
+                <td><input type="number" id="custom4th" value="0" min="0" oninput="calculateCustomTop8()"></td>
+                <td><strong><span id="total4thDisplay">0</span></strong></td>
+            </tr>
+            <tr>
+                <td>5º ao 8º Lugar (cada)</td>
+                <td><span id="base5to8thDisplay">0</span></td>
+                <td><input type="number" id="custom5to8th" value="0" min="0" oninput="calculateCustomTop8()"></td>
+                <td><strong><span id="total5to8thDisplay">0</span></strong></td>
+            </tr>
+        </tbody>
+    </table>
+    <div id="customTop8Result"></div>
+</div>
+</div>
+
+<script>
+    let currentTop8Pool = 0;
+    let currentCommittedBoosters = 0;
+    let currentTotalBoosters = 0;
+    let baseTop8 = { first: 0, second: 0, third: 0, fourth: 0, fifthToEighth: 0 };
+
+    function calculatePrizes() {
+        const playerCount = parseInt(document.getElementById('playerCountInput').value) || 0;
+        const entryFee = parseFloat(document.getElementById('entryFeeInput').value) || 0;
+        const boosterPrice = parseFloat(document.getElementById('boosterPriceInput').value) || 1;
+        const staffCut = parseFloat(document.getElementById('staffCutInput').value) || 0;
+
+        const resultsContainer = document.getElementById('resultsContainer');
+        const errorContainer = document.getElementById('errorContainer');
+
+        // Limpar resultados anteriores
+        resultsContainer.innerHTML = '';
+        errorContainer.innerHTML = '';
+
+        // Validação
+        if (playerCount < 8) {
+            errorContainer.innerHTML = 'Por favor, insira um número válido (mínimo de 8 jogadores para um Top 8).';
+            return;
+        }
+
+        // Cálculo financeiro das variáveis
+        const grossRevenue = playerCount * entryFee;
+        const staffMoney = grossRevenue * (staffCut / 100);
+        const prizePoolMoney = grossRevenue - staffMoney;
+
+        let top8Pool = Math.floor(prizePoolMoney / boosterPrice);
+
+        // Se não houver boosters suficientes (mínimo de 8) para o Top 8, a premiação base fica em 0
+        if (top8Pool < 8) {
+            top8Pool = 0;
+        }
+
+        // Salva variáveis globalmente para uso no dashboard
+        currentTop8Pool = top8Pool;
+        currentCommittedBoosters = 0;
+        currentTotalBoosters = top8Pool;
+
+        // Distribuição do Top 8 (baseada nas porcentagens)
+        let firstPlace = Math.round(top8Pool * 0.437);
+        let secondPlace = Math.round(top8Pool * 0.239);
+        let thirdPlace = Math.round(top8Pool * 0.110);
+        let fourthPlace = Math.round(top8Pool * 0.110);
+        let fifthToEighthPlace = Math.round(top8Pool * 0.026);
+
+        // Se houver menos que 15 inscritos, a premiação é só de Top 4
+        if (playerCount < 15) {
+            fifthToEighthPlace = 0;
+        }
+
+        // Ajuste para não haver sobra de fundo negativa (causada por arredondamentos)
+        let totalTop8Distributed = firstPlace + secondPlace + thirdPlace + fourthPlace + (fifthToEighthPlace * 4);
+        let deficit = totalTop8Distributed - top8Pool;
+
+        if (deficit > 0) {
+            if (playerCount >= 15) {
+                // Tira do 3º e 4º lugar para cobrir os arredondamentos do Top 8
+                while (deficit > 0 && (thirdPlace > 0 || fourthPlace > 0)) {
+                    if (deficit > 0 && thirdPlace >= fourthPlace && thirdPlace > 0) {
+                        thirdPlace--;
+                        deficit--;
+                    }
+                    if (deficit > 0 && fourthPlace > 0) {
+                        fourthPlace--;
+                        deficit--;
+                    }
+                }
+            } else {
+                // Se há menos que 15 jogadores, o segundo lugar cobre o terceiro e quarto lugar
+                while (deficit > 0 && secondPlace > 0) {
+                    secondPlace--;
+                    deficit--;
+                }
+            }
+            // Recalcula o total após os cortes
+            totalTop8Distributed = firstPlace + secondPlace + thirdPlace + fourthPlace + (fifthToEighthPlace * 4);
+        }
+
+        // Salva os valores base para a aba de sobras
+        baseTop8.first = firstPlace;
+        baseTop8.second = secondPlace;
+        baseTop8.third = thirdPlace;
+        baseTop8.fourth = fourthPlace;
+        baseTop8.fifthToEighth = fifthToEighthPlace;
+
+        document.getElementById('base1stDisplay').innerText = firstPlace;
+        document.getElementById('base2ndDisplay').innerText = secondPlace;
+        document.getElementById('base3rdDisplay').innerText = thirdPlace;
+        document.getElementById('base4thDisplay').innerText = fourthPlace;
+        document.getElementById('base5to8thDisplay').innerText = fifthToEighthPlace;
+
+        // Cálculo de boosters totais e sobras
+        const leftoverInitialPool = top8Pool - totalTop8Distributed;
+
+        const htmlContent = `
+            <div class="summary-box">
+                <strong>Arrecadação Total:</strong> R$ ${grossRevenue.toFixed(2)}<br>
+                <strong>Repasse Staff/Juiz (${staffCut}%):</strong> R$ ${staffMoney.toFixed(2)}<br>
+                <strong>Fundo de Premiação:</strong> R$ ${prizePoolMoney.toFixed(2)}<br>
+                <strong>Total de Boosters Gerados:</strong> ${top8Pool}
+            </div>
+            <table class="tcg-table">
+                <thead>
+                    <tr>
+                        <th>Posição do Top 8</th>
+                        <th>Total de Boosters</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>1º Lugar</strong></td><td><strong>${firstPlace}</strong></td></tr>
+                    <tr><td><strong>2º Lugar</strong></td><td><strong>${secondPlace}</strong></td></tr>
+                    <tr><td><strong>3º Lugar</strong></td><td><strong>${thirdPlace}</strong></td></tr>
+                    <tr><td><strong>4º Lugar</strong></td><td><strong>${fourthPlace}</strong></td></tr>
+                    <tr><td>5º ao 8º Lugar</td><td>${fifthToEighthPlace} (cada)</td></tr>
+                </tbody>
+            </table>
+            <div class="summary-box" style="margin-top: 20px; border-left-color: #5cb85c; background-color: #eafaf1;">
+                <strong>Total de Boosters Distribuídos:</strong> ${totalTop8Distributed}<br>
+                <strong>Boosters Restantes (Sobras do Fundo):</strong> ${leftoverInitialPool}
+            </div>
+        `;
+
+        resultsContainer.innerHTML = htmlContent;
+
+        // Atualiza a aba do top 8 personalizado para manter as sobras organizadas
+        calculateCustomTop8();
+    }
+
+    function calculateCustomTop8() {
+        const extra1st = parseInt(document.getElementById('custom1st').value) || 0;
+        const extra2nd = parseInt(document.getElementById('custom2nd').value) || 0;
+        const extra3rd = parseInt(document.getElementById('custom3rd').value) || 0;
+        const extra4th = parseInt(document.getElementById('custom4th').value) || 0;
+        const extra5to8th = parseInt(document.getElementById('custom5to8th').value) || 0;
+
+        const total1st = baseTop8.first + extra1st;
+        const total2nd = baseTop8.second + extra2nd;
+        const total3rd = baseTop8.third + extra3rd;
+        const total4th = baseTop8.fourth + extra4th;
+        const total5to8th = baseTop8.fifthToEighth + extra5to8th;
+
+        document.getElementById('total1stDisplay').innerText = total1st;
+        document.getElementById('total2ndDisplay').innerText = total2nd;
+        document.getElementById('total3rdDisplay').innerText = total3rd;
+        document.getElementById('total4thDisplay').innerText = total4th;
+        document.getElementById('total5to8thDisplay').innerText = total5to8th;
+
+        const totalExtra = extra1st + extra2nd + extra3rd + extra4th + (extra5to8th * 4);
+        const baseTop8Total = baseTop8.first + baseTop8.second + baseTop8.third + baseTop8.fourth + (baseTop8.fifthToEighth * 4);
+        const totalTop8Distributed = baseTop8Total + totalExtra;
+
+        const totalDistributedEvent = currentCommittedBoosters + totalTop8Distributed;
+        const customLeftovers = currentTotalBoosters - totalDistributedEvent;
+
+        let diffHtml = '';
+        if (customLeftovers < 0) {
+            diffHtml = `<span style="color: #d9534f;"><strong>Atenção:</strong> Você distribuiu ${Math.abs(customLeftovers)} boosters a mais do que o dinheiro cobriu!</span>`;
+        } else {
+            diffHtml = `<span style="color: #5cb85c;"><strong>Novas Sobras Restantes:</strong> ${customLeftovers} boosters</span>`;
+        }
+
+        document.getElementById('customTop8Result').innerHTML = `
+            <div class="summary-box">
+                <strong>Base Top 8:</strong> ${baseTop8Total} boosters<br>
+                <strong>Adicionais Distribuídos:</strong> ${totalExtra} boosters<br>
+                <strong>Total Top 8 Final:</strong> ${totalTop8Distributed} boosters
+            </div>
+            <div class="summary-box" style="margin-top: 20px; border-left-color: ${customLeftovers >= 0 ? '#5cb85c' : '#d9534f'}; background-color: ${customLeftovers >= 0 ? '#eafaf1' : '#f2dede'};">
+                <strong>Novo Total Distribuído:</strong> ${totalDistributedEvent}<br>
+                ${diffHtml}
+            </div>
+        `;
+    }
+
+    // Executa a função uma vez ao carregar a página para mostrar os dados de todos os jogadores
+    window.onload = calculatePrizes;
+</script>
+
+</body>
+</html>
