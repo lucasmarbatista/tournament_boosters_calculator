@@ -213,11 +213,15 @@
             third = Math.round(pool * 0.110);
             fourth = Math.round(pool * 0.110);
             fifthToEighth = Math.round(pool * 0.026);
-        } else if (players >= 4) {
+        } else if (players >= 5) {
+            first = Math.round(pool * 0.437);
+            second = Math.round(pool * 0.239);
+            third = Math.round(pool * 0.110);
+            fourth = Math.round(pool * 0.110);
+        } else if (players === 4) {
             first = Math.round(pool * 0.50);
             second = Math.round(pool * 0.30);
-            third = Math.round(pool * 0.10);
-            fourth = Math.round(pool * 0.10);
+            third = Math.round(pool * 0.20);
         } else if (players >= 2) {
             first = Math.round(pool * 0.70);
             second = Math.round(pool * 0.30);
@@ -225,8 +229,33 @@
             first = pool;
         }
 
-        const total = first + second + third + fourth + (fifthToEighth * 4);
-        return { first, second, third, fourth, fifthToEighth, total };
+        if (players === 3 && third === 0 && first > 1) {
+            first--;
+            third++;
+        }
+
+        let totalDistributed = first + second + third + fourth + (fifthToEighth * 4);
+        let deficit = totalDistributed - pool;
+
+        if (deficit > 0) {
+            if (players >= 5) {
+                while (deficit >= 2 && third > 0) {
+                    third--;
+                    fourth--;
+                    deficit -= 2;
+                }
+            } else if (players === 4) {
+                while (deficit > 0 && third > 0) {
+                    third--;
+                    deficit--;
+                }
+            }
+            while (deficit > 0 && second > 0) { second--; deficit--; }
+            while (deficit > 0 && first > 0) { first--; deficit--; }
+            totalDistributed = first + second + third + fourth + (fifthToEighth * 4);
+        }
+
+        return { first, second, third, fourth, fifthToEighth, total: totalDistributed };
     }
 
     function syncBoxesToBoosters() {
