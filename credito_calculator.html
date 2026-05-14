@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Premiação Torneio TCG</title>
+    <style>
+        .tcg-calculator {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .tcg-calculator h2 {
+            text-align: center;
+            color: #333;
+        }
+    .settings-panel {
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+        }
+    .input-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 12px;
+    }
+    .input-row:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .input-row label {
+            font-weight: bold;
+            color: #555;
+        font-size: 14px;
+        }
+    .input-row input {
+            width: 80px;
+        padding: 6px;
+        font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .tcg-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: #fff;
+        }
+        .tcg-table th, .tcg-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        .tcg-table th {
+            background-color: #e23535;
+            color: white;
+            font-weight: bold;
+        }
+        .tcg-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .tcg-table input {
+            width: 60px;
+            padding: 6px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .error-message {
+            color: #d9534f;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .summary-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 6px;
+            border-left: 4px solid #0275d8;
+        }
+        .top8-calc-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+<div class="tcg-calculator">
+    <h2>Calculadora de Premiação<br>para Torneios</h2>
+
+    <div class="settings-panel">
+        <div class="input-row">
+            <label for="playerCountMaster">Inscritos Masters:</label>
+            <input type="number" id="playerCountMaster" value="20" min="0" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="playerCountSenior">Inscritos Seniors:</label>
+            <input type="number" id="playerCountSenior" value="0" min="0" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="playerCountJunior">Inscritos Juniors:</label>
+            <input type="number" id="playerCountJunior" value="0" min="0" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="entryFeeInput">Valor da Inscrição (R$):</label>
+            <input type="number" id="entryFeeInput" value="30" min="0" step="0.50" oninput="calculatePrizes()">
+        </div>
+        <div class="input-row">
+            <label for="staffCutInput">Staff e Juízes (%):</label>
+            <input type="number" id="staffCutInput" value="30" min="0" max="100" oninput="calculatePrizes()">
+        </div>
+    </div>
+
+    <div id="errorContainer" class="error-message"></div>
+
+    <div id="resultsContainer">
+        <!-- A tabela e o resumo serão injetados aqui pelo JavaScript -->
+    </div>
+</div>
+
+<div class="tcg-calculator">
+    <h2>Distribuição por Pontuação<br>(Crédito na Loja)</h2>
+    <p style="text-align: center; font-size: 0.95em; color: #666; margin-top: -10px; margin-bottom: 20px;">
+        Baseado nos <span id="displayPlayerCount">0</span> inscritos, o torneio terá <strong><span id="roundCountDisplay">0</span> rodadas</strong>.<br>
+        Informe quantos jogadores terminaram com cada pontuação. O sistema dividirá o valor arrecadado automaticamente, pagando mais créditos para quem fez mais pontos.
+    </p>
+    <table class="tcg-table">
+        <thead>
+            <tr>
+                <th>Pontuação<br>(Vitórias)</th>
+                <th>Qtd de<br>Jogadores</th>
+                <th>Crédito (R$)<br>por Jogador</th>
+                <th>Total Distribuído<br>(R$)</th>
+            </tr>
+        </thead>
+        <tbody id="pointsTableBody">
+            <!-- Linhas injetadas pelo JavaScript -->
+        </tbody>
+    </table>
+    <div id="customPointsResult"></div>
+</div>
+</div>
+
+<script>
+    let currentPrizePool = 0;
+    let currentRounds = -1;
+    let pointTiers = [];
+
+    // Define as rodadas com base no número de jogadores (Regra Oficial Básica)
+    function getSwissRounds(players) {
+        if (players <= 1) return 0;
+        if (players <= 8) return 3;
+        if (players <= 16) return 4;
+        if (players <= 32) return 5;
+        if (players <= 64) return 6;
+        if (players <= 128) return 7;
+        if (players <= 226) return 8;
+        return 9;
+    }
+
+
+    function calculatePrizes() {
+        const masterCount = parseInt(document.getElementById('playerCountMaster').value) || 0;
+        const seniorCount = parseInt(document.getElementById('playerCountSenior').value) || 0;
+        const juniorCount = parseInt(document.getElementById('playerCountJunior').value) || 0;
+        const playerCount = masterCount + seniorCount + juniorCount;
+
+        const entryFee = parseFloat(document.getElementById('entryFeeInput').value) || 0;
+        const staffCut = parseFloat(document.getElementById('staffCutInput').value) || 0;
+
+        const resultsContainer = document.getElementById('resultsContainer');
+        const errorContainer = document.getElementById('errorContainer');
+
+        resultsContainer.innerHTML = '';
+        errorContainer.innerHTML = '';
+
+        if (playerCount < 1) {
+            errorContainer.innerHTML = 'Por favor, insira pelo menos 1 jogador.';
+            document.getElementById('pointsTableBody').innerHTML = '';
+            document.getElementById('customPointsResult').innerHTML = '';
+            document.getElementById('roundCountDisplay').innerText = '0';
+            document.getElementById('displayPlayerCount').innerText = '0';
+            return;
+        }
+
+        const grossRevenue = playerCount * entryFee;
+        const staffMoney = grossRevenue * (staffCut / 100);
+        let prizePoolMoney = grossRevenue - staffMoney;
+        if (prizePoolMoney < 0) prizePoolMoney = 0;
+
+        currentPrizePool = prizePoolMoney;
+
+        // Previsão do Sistema Suíço
+        const rounds = getSwissRounds(playerCount);
+        document.getElementById('displayPlayerCount').innerText = playerCount;
+        document.getElementById('roundCountDisplay').innerText = rounds;
+
+        // Só recria as linhas se o número de rodadas mudou
+        if (rounds !== currentRounds) {
+            currentRounds = rounds;
+            pointTiers = [];
+            for (let wins = rounds; wins >= 0; wins--) {
+                pointTiers.push({
+                    points: wins * 3,
+                    wins: wins,
+                    players: 0,
+                    payout: 0
+                });
+            }
+        }
+
+        const htmlContent = `
+            <div class="summary-box" style="font-size: 1.15em; line-height: 1.6; border-left-width: 6px; box-shadow: 0 4px 8px rgba(2, 117, 216, 0.15);">
+                <strong>Arrecadação Total:</strong> R$ ${grossRevenue.toFixed(2)}<br>
+                <strong>Repasse Staff/Juiz (${staffCut}%):</strong> R$ ${staffMoney.toFixed(2)}<br>
+                <strong>Total de Inscritos:</strong> <span style="color: #e23535; font-weight: bold; font-size: 1.1em;">${playerCount}</span> <span style="font-size: 0.85em; color: #555;">(Master: <b>${masterCount}</b> | Senior: <b>${seniorCount}</b> | Junior: <b>${juniorCount}</b>)</span><br>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #b8daff; font-size: 1.2em; color: #004a99;">
+                    <strong>Fundo de Premiação (Pool Crédito):</strong> <span style="background-color: #004a99; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold;">R$ ${currentPrizePool.toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+
+        resultsContainer.innerHTML = htmlContent;
+        renderPointsTable();
+    }
+
+    function renderPointsTable() {
+        const tbody = document.getElementById('pointsTableBody');
+        let html = '';
+        pointTiers.forEach((tier, index) => {
+            const cost = tier.players * tier.payout;
+            html += `
+                <tr>
+                    <td><strong>${tier.points} pts</strong><br><span style="font-size: 0.8em; color: #777;">(${tier.wins} Vitórias)</span></td>
+                    <td><input type="number" value="${tier.players}" min="0" oninput="updateTier(${index}, 'players', this.value)"></td>
+                    <td style="background-color: #f8f9fa; font-size: 1.1em; color: #004a99;"><strong><span id="payout_${index}">R$ ${tier.payout.toFixed(2)}</span></strong></td>
+                    <td><strong><span id="cost_${index}">R$ ${cost.toFixed(2)}</span></strong></td>
+                </tr>
+            `;
+        });
+
+        // Linha para adicionar pontos manuais (ex: empates)
+        html += `
+            <tr>
+                <td colspan="4" style="text-align: center;">
+                    <button onclick="addCustomPointTier()" style="padding: 6px 12px; background: #0275d8; color: #fff; border: none; border-radius: 4px; cursor: pointer;">+ Adicionar Pontuação Extra (Empates)</button>
+                </td>
+            </tr>
+        `;
+
+        tbody.innerHTML = html;
+        calculatePointsCost();
+    }
+
+    function updateTier(index, field, value) {
+        if (field === 'players') {
+            pointTiers[index].players = parseInt(value) || 0;
+        }
+        calculatePointsCost();
+    }
+
+    function addCustomPointTier() {
+        const pts = prompt("Digite a pontuação (ex: 10 para 3 vitórias e 1 empate):");
+        if (pts !== null && pts.trim() !== "" && !isNaN(pts)) {
+            pointTiers.push({
+                points: parseInt(pts),
+                wins: "?",
+                players: 0,
+                payout: 0
+            });
+            // Ordena decrescente pela pontuação
+            pointTiers.sort((a, b) => b.points - a.points);
+            renderPointsTable();
+        }
+    }
+
+    function calculatePointsCost() {
+        let totalPoints = 0;
+        pointTiers.forEach(tier => {
+            totalPoints += tier.players * tier.points;
+        });
+
+        let totalCost = 0;
+        let totalPlayersRewarded = 0;
+
+        // Fase 1: Distribuição base e cálculo das frações perdidas (Resto)
+        pointTiers.forEach(tier => {
+            tier.exactPayout = totalPoints > 0 ? (tier.points * (currentPrizePool / totalPoints)) : 0;
+            tier.payout = Math.floor(tier.exactPayout * 100) / 100;
+            tier.remainder = tier.exactPayout - tier.payout;
+        });
+
+        // Fase 2: Distribuição Automática de Sobras (Centavos) pelo Método do Maior Resto
+        let baseCost = pointTiers.reduce((sum, tier) => sum + (tier.players * tier.payout), 0);
+        let leftoversCents = Math.round((currentPrizePool - baseCost) * 100);
+
+        // Ordena uma cópia dos tiers para priorizar quem tem o "maior resto"
+        let sortedTiers = [...pointTiers].sort((a, b) => b.remainder - a.remainder);
+        for (let tier of sortedTiers) {
+            // Só distribui a sobra se houver centavos suficientes para todos os jogadores com aquela pontuação
+            if (tier.players > 0 && leftoversCents >= tier.players) {
+                tier.payout += 0.01;
+                tier.payout = Math.round(tier.payout * 100) / 100;
+                leftoversCents -= tier.players;
+            }
+        }
+
+        // Fase 3: Atualiza a tela com os prêmios finais
+        pointTiers.forEach((tier, index) => {
+            const payoutSpan = document.getElementById(`payout_${index}`);
+            if (payoutSpan) payoutSpan.innerText = 'R$ ' + tier.payout.toFixed(2);
+
+            totalCost += tier.players * tier.payout;
+            if (tier.payout > 0) {
+                totalPlayersRewarded += tier.players;
+            }
+
+            const costSpan = document.getElementById(`cost_${index}`);
+            if (costSpan) costSpan.innerText = 'R$ ' + (tier.players * tier.payout).toFixed(2);
+        });
+
+        const customLeftovers = currentPrizePool - totalCost;
+
+        let diffHtml = '';
+        if (customLeftovers < -0.01) {
+            diffHtml = `<span style="color: #721c24;"><strong>Atenção:</strong> A distribuição excede o Pool em <span style="background-color: #d9534f; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold;">R$ ${Math.abs(customLeftovers).toFixed(2)}</span>!</span>`;
+        } else {
+            diffHtml = `<span style="color: #155724;"><strong>Sobras do Fundo (Caixa):</strong> <span style="background-color: #28a745; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold;">R$ ${Math.max(0, customLeftovers).toFixed(2)}</span></span>`;
+        }
+
+        document.getElementById('customPointsResult').innerHTML = `
+            <div class="summary-box" style="margin-top: 20px; border-left-color: ${customLeftovers >= -0.01 ? '#5cb85c' : '#d9534f'}; background-color: ${customLeftovers >= -0.01 ? '#eafaf1' : '#f2dede'}; font-size: 1.15em; line-height: 1.6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <strong>Pool Arrecadado:</strong> R$ ${currentPrizePool.toFixed(2)}<br>
+                <strong>Jogadores Premiados:</strong> ${totalPlayersRewarded} de ${document.getElementById('displayPlayerCount').innerText} inscritos<br>
+                <strong>Custo Total da Distribuição:</strong> <span style="font-weight: bold; font-size: 1.1em;">R$ ${totalCost.toFixed(2)}</span><br>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed ${customLeftovers >= -0.01 ? '#c3e6cb' : '#f5c6cb'}; font-size: 1.2em;">
+                    ${diffHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // Executa a função uma vez ao carregar a página para mostrar os dados de todos os jogadores
+    window.onload = calculatePrizes;
+</script>
+
+</body>
+</html>
