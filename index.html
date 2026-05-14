@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadoras de Premiação TCG</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            padding: 40px 30px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            text-align: center;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        p.subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .calc-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 20px;
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        .calc-card:hover {
+            border-color: #0275d8;
+            background-color: #e8f4f8;
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(2, 117, 216, 0.15);
+        }
+        .calc-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.4em;
+            color: #0275d8;
+        }
+        .calc-card p {
+            margin: 0;
+            font-size: 0.95em;
+            color: #555;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculadoras de Premiação TCG</h1>
+    <p class="subtitle">Selecione o formato do seu torneio para acessar a calculadora adequada.</p>
+
+    <div class="button-grid">
+        <a href="tournament_calculator.html" class="calc-card">
+            <h2>1. Torneios Gerais</h2>
+            <p>Distribuição focada na distribuição para o Top (Top 4, Top 8) utilizando boosters.</p>
+        </a>
+
+        <a href="prerelease_calculator.html" class="calc-card">
+            <h2>2. Pré-Release</h2>
+            <p>Distribuição para Pré-Release garantindo boosters de participação para todos e separando o pool para o Top.</p>
+        </a>
+
+        <a href="points_calculator.html" class="calc-card">
+            <h2>3. Pontuação (Boosters)</h2>
+            <p>Distribuição proporcional de boosters calculada pela performance e pontos conquistados.</p>
+        </a>
+
+        <a href="credit_calculator.html" class="calc-card">
+            <h2>4. Pontuação (Crédito)</h2>
+            <p>Distribuição monetária exata (em R$) baseada em pontos para gerar Crédito na Loja.</p>
+        </a>
+
+        <a href="doc.html" class="calc-card" style="grid-column: 1 / -1; background-color: #e8f4f8; border-color: #b8daff; margin-top: 10px;">
+            <h2 style="color: #004a99;">📚 Entenda as Regras e Cálculos</h2>
+            <p>Acesse a documentação completa com o passo a passo matemático, regras do Maior Resto e explicação de todos os inputs utilizados no sistema.</p>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

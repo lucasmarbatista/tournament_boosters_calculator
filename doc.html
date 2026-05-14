@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação - Calculadoras de Premiação TCG</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            padding: 30px 15px;
+            margin: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #0275d8;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            transition: background 0.3s;
+        }
+        .back-btn:hover {
+            background-color: #025aa5;
+        }
+        h1 {
+            color: #222;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+        }
+        h2 {
+            color: #0275d8;
+            margin-top: 40px;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #e23535;
+            margin-top: 35px;
+            font-size: 1.4em;
+        }
+        p {
+            font-size: 1.05em;
+            color: #444;
+        }
+        ul, ol {
+            font-size: 1.05em;
+            color: #444;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            color: #d63384;
+            font-family: Consolas, monospace;
+            font-size: 0.95em;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #e9ecef;
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="index.html" class="back-btn">&larr; Voltar ao Menu</a>
+
+    <h1>Documentação e Regras de Cálculo</h1>
+    <p>Uma ferramenta para calcular a distribuição de boosters (premiação) em torneios de card games, garantindo uma divisão que se adapta a diferentes categorias e quantidades de jogadores.</p>
+
+    <h2>Tipos de Calculadoras</h2>
+    <p>O sistema conta com 4 tipos de calculadoras, cada uma desenvolvida para um formato específico de torneio. Abaixo está a explicação de cada uma, seus inputs e as regras de cálculo.</p>
+
+    <hr>
+
+    <h3>1. Calculadora para Torneios Gerais (Distribuição para o Top)</h3>
+    <p><strong>O que é:</strong> Ideal para torneios mais competitivos. Esse modelo junta toda a premiação gerada pelas inscrições e foca a distribuição nos jogadores que alcançarem as melhores colocações (como o Top 4 ou Top 8).</p>
+
+    <p><strong>Inputs (Como usar):</strong></p>
+    <ul>
+        <li><code>Inscritos Masters</code>, <code>Seniors</code> e <code>Juniors</code>: Quantidade de jogadores inscritos em cada categoria. A soma deles forma o total de jogadores, e a proporção de cada um define qual a fatia do pool de premiação destinada a cada grupo.</li>
+        <li><code>Valor da Inscrição (R$)</code>: O valor cobrado de cada jogador para participar do evento. Serve para calcular a arrecadação bruta do torneio.</li>
+        <li><code>Preço do Booster (R$)</code>: O custo ou valor de repasse unitário do booster. É utilizado para converter o saldo do fundo de premiação financeiro na quantidade física de boosters do Pool.</li>
+        <li><code>Staff e Juízes (%)</code>: A porcentagem da arrecadação total que será deduzida para pagamento da equipe (staff/juízes) antes de gerar o Pool de prêmios.</li>
+    </ul>
+
+    <p><strong>Como é feito o cálculo:</strong><br>
+    Primeiro, a calculadora descobre a <strong>Arrecadação Total</strong> multiplicando o número de jogadores pelo valor da inscrição. Depois, ela separa a parte da equipe (<strong>Staff/Juízes</strong>) e utiliza o valor que sobrou no fundo para dividir pelo <strong>Preço do Booster</strong>. É assim que chegamos ao <strong>Pool Total</strong> de boosters. A partir daí, dividimos esse total entre as categorias (Master, Senior e Junior), seguindo a distribuição abaixo com base em quantos jogadores cada uma tem (já cuidando dos arredondamentos de forma automática):</p>
+
+    <ul>
+        <li><strong>1 Jogador:</strong> 100% do Pool.</li>
+        <li><strong>2 a 3 Jogadores (Focado no Top 2):</strong> 1º Lugar: ~70% | 2º Lugar: ~30%<br><em>(Se houverem 3 jogadores e saldo, tira-se 1 booster do 1º colocado para dar ao 3º.)</em></li>
+        <li><strong>4 Jogadores (Focado no Top 3):</strong> 1º Lugar: 50% | 2º Lugar: 30% | 3º Lugar: 20%</li>
+        <li><strong>5 a 7 Jogadores (Focado no Top 4):</strong> 1º Lugar: ~43.7% | 2º Lugar: ~23.9% | 3º e 4º Lugares: ~11% cada</li>
+        <li><strong>8 ou mais Jogadores (Corte para Top 8):</strong> 1º Lugar: ~43.7% | 2º Lugar: ~23.9% | 3º e 4º Lugares: ~11% cada | 5º ao 8º Lugares: ~2.6% cada</li>
+        <li><strong>Correção de Arredondamento:</strong> Se os arredondamentos tentarem distribuir mais boosters do que o <em>Pool</em> permite, o algoritmo deduz essa diferença das premiações menores até o montante igualar exatamente o limite financeiro disponível.</li>
+    </ul>
+
+    <hr>
+
+    <h3>2. Calculadora para Formato Pre-release (Participação + Top)</h3>
+    <p><strong>O que é:</strong> Para eventos como o Pre-release. A ideia aqui é garantir que todo mundo volte para casa com pelo menos um prêmio só por ter participado, mas ainda assim guardando uma quantidade de boosters para recompensar os melhores colocados.</p>
+
+    <p><strong>Inputs (Como usar):</strong></p>
+    <ul>
+        <li><code>Inscritos Masters</code>, <code>Seniors</code> e <code>Juniors</code>: Quantidade de jogadores em cada categoria. A proporção define como a premiação do Top será fatiada.</li>
+        <li><code>Total de Boxes</code> / <code>Total de Boosters (Pool)</code>: A quantidade máxima em estoque reservada para o evento. Os campos são sincronizados (1 Box = 36 boosters).</li>
+        <li><code>Boosters de participação (por pessoa)</code>: Quantos boosters cada jogador recebe garantido apenas por jogar.</li>
+        <li><code>Juízes/Staff (Total Boosters)</code>: Quantidade de boosters retirada do montante total para pagamento da equipe (diferente de torneios gerais, aqui desconta-se em boosters físicos em vez de R$).</li>
+        <li><code>Promoção Traga um Amigo (Total Boosters)</code>: Quantidade de boosters separada previamente para sorteios ou campanhas.</li>
+    </ul>
+
+    <p><strong>Como é feito o cálculo:</strong></p>
+    <ol>
+        <li><strong>Destinos Fixos:</strong> Antes de tudo, separamos os boosters que já estão prometidos. O sistema pega a quantidade de jogadores e multiplica pelos <code>Boosters de participação</code>, e depois soma isso com os boosters que vão para os juízes e para as promoções.</li>
+        <li><strong>Pool dos Vencedores (Top Global):</strong> Com os prêmios fixos separados, a gente tira esse valor do <code>Total de Boosters</code>. O que sobrar é considerado o fundo de premiação para os vencedores.</li>
+        <li><strong>Distribuição Proporcional (O Top Cut):</strong> O pool dos vencedores é distribuído entre as categorias (Master, Senior e Junior), dependendo de quantos inscritos cada uma teve. O sistema cuida dos arredondamentos exatamente sob os mesmos cortes da Calculadora 1 (Top 2, 3, 4 ou 8).</li>
+        <li><strong>Sobras de Estoque:</strong> No final, a calculadora checa se a soma de tudo que foi distribuído bate com o seu estoque inicial e mostra direitinho quantos boosters sobraram (ou te avisa se você tentar dar mais prêmios do que realmente tem disponível).</li>
+    </ol>
+
+    <hr>
+
+    <h3>3. Calculadora de Distribuição por Pontuação (Proporcional Automática)</h3>
+    <p><strong>O que é:</strong> Ideal para organizadores que preferem premiar com base na performance real de cada jogador (pontuação final) em vez de focar apenas no Top Cut. Distribuição: quem faz mais pontos ao longo das rodadas leva uma fatia maior do pool de boosters.</p>
+
+    <p><strong>Inputs (Como usar):</strong></p>
+    <ul>
+        <li><code>Inscritos Masters</code>, <code>Seniors</code> e <code>Juniors</code>: A quantidade de jogadores total define automaticamente o número de rodadas do torneio (Regras de Suíço).</li>
+        <li><code>Valor da Inscrição</code>, <code>Preço do Booster</code> e <code>Staff e Juízes (%)</code>: Seguem a mesma lógica da calculadora 1 para formar o fundo de premiação ("Pool").</li>
+        <li><code>Tabela de Pontuação</code>: A calculadora gera automaticamente as faixas de vitórias com base no número de rodadas. Você só precisa digitar na coluna <strong>"Qtd de Jogadores"</strong> quantas pessoas terminaram com aquela pontuação.</li>
+        <li><code>Adicionar Pontuação Extra</code>: Um botão prático para inserir pontuações "quebradas" por empates (ex: 10 pontos = 3 vitórias e 1 empate).</li>
+    </ul>
+
+    <p><strong>Como é feito o cálculo:</strong><br>Diferente das outras calculadoras que dividem por "Colocação", esta usa a pontuação como peso. A mágica acontece em três fases automáticas:</p>
+    <ol>
+        <li><strong>O Valor do Ponto:</strong> O sistema pega os resultados que você digitou na tabela, multiplica pelos pontos e soma tudo. Depois, ele divide o nosso <strong>Pool Total</strong> de boosters por essa "massa de pontos" para descobrir matematicamente quanto vale 1 único ponto no torneio.</li>
+        <li><strong>Distribuição Base:</strong> Cada jogador recebe a sua pontuação multiplicada por esse "valor do ponto". O sistema corta as casas decimais (arredonda para baixo) para garantir que você nunca distribua mais boosters do que realmente arrecadou.</li>
+        <li><strong>Distribuição de Sobras (Método do Maior Resto):</strong> Como arredondamos tudo para baixo, sobram boosters! A calculadora identifica quem foi mais prejudicado na matemática (ex: um jogador que deveria ganhar <code>2.8</code> boosters e ficou com 2, perdeu <code>0.8</code>). Ela devolve as sobras para essas pessoas com "maior resto" de forma decrescente, até fechar o estoque! <em>(Regra de Ouro: Ela só entrega a sobra se você tiver boosters suficientes para premiar <strong>todos</strong> os jogadores empatados naquela pontuação.)</em></li>
+        <li><strong>Estoque Final:</strong> Se sobrar algum booster isolado (porque a próxima pontuação elegível tem mais jogadores do que a quantidade de sobras), ele ficará registrado na caixa verde de <strong>Sobras do Fundo (Estoque)</strong> para você realizar um sorteio ("Lucky Drop") ou usar como prêmio de consolação.</li>
+    </ol>
+
+    <hr>
+
+    <h3>4. Calculadora de Distribuição por Pontuação (Crédito na Loja)</h3>
+    <p><strong>O que é:</strong> Uma variação do formato de pontuação, mas focada inteiramente em distribuir prêmios em <strong>Crédito na Loja</strong> (dinheiro/saldo) em vez de boosters físicos. Ideal para eventos regulares onde os jogadores preferem acumular saldo para comprar cartas avulsas ou outros produtos da loja.</p>
+
+    <p><strong>Inputs (Como usar):</strong></p>
+    <ul>
+        <li><code>Inscritos Masters</code>, <code>Seniors</code> e <code>Juniors</code>: A quantidade de jogadores total define o número de rodadas.</li>
+        <li><code>Valor da Inscrição (R$)</code> e <code>Staff e Juízes (%)</code>: Usados para calcular a arrecadação e descontar a equipe, formando o nosso <strong>Pool de Crédito (R$)</strong>. <em>(Diferente das outras calculadoras, não é preciso o "Preço do Booster" aqui!)</em></li>
+        <li><code>Tabela de Pontuação</code> e <code>Adicionar Pontuação Extra</code>: Funcionam exatamente como na calculadora 3, onde você informa a quantidade de jogadores que atingiram cada pontuação (incluindo empates).</li>
+    </ul>
+
+    <p><strong>Como é feito o cálculo:</strong><br>A grande diferença desta calculadora para a anterior é a precisão. Como estamos lidando com dinheiro, o sistema não fatiará o fundo em "números inteiros", mas sim na exatidão de <strong>centavos (R$ 0,01)</strong>:</p>
+    <ol>
+        <li><strong>O Valor do Ponto em Dinheiro:</strong> O sistema soma todos os pontos registrados na tabela e divide o <strong>Pool de Crédito</strong> por essa quantidade. Isso revela exatamente quantos Reais e centavos vale 1 ponto no torneio.</li>
+        <li><strong>Distribuição Base (Centavos):</strong> Cada jogador recebe sua pontuação multiplicada por esse "valor do ponto monetário". O sistema faz um corte nas casas decimais, arredondando tudo rigorosamente para baixo na segunda casa decimal (centavos), evitando que a loja pague mais dinheiro do que o arrecadado.</li>
+        <li><strong>Distribuição de Trocos (Método do Maior Resto):</strong> Como as dízimas periódicas podem fazer o total ficar alguns centavos abaixo do arrecadado, a calculadora usa o mesmo método da calculadora 3. Ela descobre qual grupo de jogadores perdeu a maior fração monetária no arredondamento inicial e entrega o "crédito restante" em centavos que sobraria até a conta fechar de forma perfeita.</li>
+        <li><strong>Caixa Final:</strong> O sistema exibe o custo final em R$, que devido aos cálculos de alta precisão, fechará perfeitamente ou deixará no máximo alguns centavos residuais na <strong>Sobra do Fundo (Caixa)</strong>, blindando o caixa da sua loja contra furos!</li>
+    </ol>
+
+    <div style="text-align: center; margin-top: 50px;">
+        <a href="index.html" class="back-btn" style="padding: 15px 30px; font-size: 1.1em;">Ir para as Calculadoras</a>
+    </div>
+</div>
+
+</body>
+</html>

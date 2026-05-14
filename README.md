@@ -1,5 +1,5 @@
 # tournament_boosters_calculador
-Uma ferramenta para calcular a distribuição de boosters (premiação) em torneios de card games, garantindo uma divisão justa que se adapta a diferentes categorias e quantidades de jogadores.
+Uma ferramenta para calcular a distribuição de boosters (premiação) em torneios de card games, garantindo uma divisão que se adapta a diferentes categorias e quantidades de jogadores.
 
 ## Tipos de Calculadoras
 
@@ -17,7 +17,7 @@ O sistema conta com 4 tipos de calculadoras, cada uma desenvolvida para um forma
 - `Staff e Juízes (%)`: A porcentagem da arrecadação total que será deduzida para pagamento da equipe (staff/juízes) antes de gerar o Pool de prêmios.
 
 **Como é feito o cálculo:**
-Primeiro, a calculadora descobre a **Arrecadação Total** multiplicando o número de jogadores pelo valor da inscrição. Depois, ela separa a parte da equipe (**Staff/Juízes**) e utiliza o valor que sobrou no fundo para dividir pelo **Preço do Booster**. É assim que chegamos ao **Pool Total** de boosters. A partir daí, dividimos esse total de forma justa entre as categorias (Master, Senior e Junior), seguindo a distribuição abaixo com base em quantos jogadores cada uma tem (já cuidando dos arredondamentos de forma automática):
+Primeiro, a calculadora descobre a **Arrecadação Total** multiplicando o número de jogadores pelo valor da inscrição. Depois, ela separa a parte da equipe (**Staff/Juízes**) e utiliza o valor que sobrou no fundo para dividir pelo **Preço do Booster**. É assim que chegamos ao **Pool Total** de boosters. A partir daí, dividimos esse total entre as categorias (Master, Senior e Junior), seguindo a distribuição abaixo com base em quantos jogadores cada uma tem (já cuidando dos arredondamentos de forma automática):
 
 * **1 Jogador:** 100% do Pool.
 * **2 a 3 Jogadores (Focado no Top 2):**
@@ -81,7 +81,7 @@ Primeiro, a calculadora descobre a **Arrecadação Total** multiplicando o núme
 ---
 
 ### 3. Calculadora de Distribuição por Pontuação (Proporcional Automática)
-**O que é:** Ideal para organizadores que preferem premiar com base na performance real de cada jogador (pontuação final) em vez de focar apenas no Top Cut. A distribuição é justa: quem faz mais pontos ao longo das rodadas leva uma fatia maior do pool de boosters.
+**O que é:** Ideal para organizadores que preferem premiar com base na performance real de cada jogador (pontuação final) em vez de focar apenas no Top Cut. Distribuição: quem faz mais pontos ao longo das rodadas leva uma fatia maior do pool de boosters.
 
 **Inputs (Como usar):**
 - `Inscritos Masters`, `Seniors` e `Juniors`: A quantidade de jogadores total define automaticamente o número de rodadas do torneio (Regras de Suíço).
@@ -94,7 +94,7 @@ Diferente das outras calculadoras que dividem por "Colocação", esta usa a pont
 
 1. **O Valor do Ponto:** O sistema pega os resultados que você digitou na tabela, multiplica pelos pontos e soma tudo. Depois, ele divide o nosso **Pool Total** de boosters por essa "massa de pontos" para descobrir matematicamente quanto vale 1 único ponto no torneio.
 2. **Distribuição Base:** Cada jogador recebe a sua pontuação multiplicada por esse "valor do ponto". O sistema corta as casas decimais (arredonda para baixo) para garantir que você nunca distribua mais boosters do que realmente arrecadou.
-3. **Distribuição Justa de Sobras (Método do Maior Resto):** Como arredondamos tudo para baixo, sobram boosters! A calculadora identifica quem foi mais prejudicado na matemática (ex: um jogador que deveria ganhar `2.8` boosters e ficou com 2, perdeu `0.8`). Ela devolve as sobras para essas pessoas com "maior resto" de forma decrescente, até fechar o estoque!
+3. **Distribuição de Sobras (Método do Maior Resto):** Como arredondamos tudo para baixo, sobram boosters! A calculadora identifica quem foi mais prejudicado na matemática (ex: um jogador que deveria ganhar `2.8` boosters e ficou com 2, perdeu `0.8`). Ela devolve as sobras para essas pessoas com "maior resto" de forma decrescente, até fechar o estoque!
    * *Regra de Ouro:* Ela só entrega a sobra se você tiver boosters suficientes para premiar **todos** os jogadores empatados naquela pontuação.
 4. **Estoque Final:** Se sobrar algum booster isolado (por exemplo, sobrou 1 booster, mas a próxima pontuação elegível tem 3 jogadores e isso daria briga), ele ficará registrado na caixa verde de **Sobras do Fundo (Estoque)** para você realizar um sorteio ("Lucky Drop") ou usar como prêmio de consolação!
 
@@ -105,7 +105,7 @@ Diferente das outras calculadoras que dividem por "Colocação", esta usa a pont
 
 **Inputs (Como usar):**
 - `Inscritos Masters`, `Seniors` e `Juniors`: A quantidade de jogadores total define o número de rodadas.
-- `Valor da Inscrição (R$)` e `Staff e Juízes (%)`: Usados para calcular a arrecadação e descontar a equipe, formando o nosso **Pool de Crédito (R$)**. *(Diferente das outras calculadoras, não precisamos do "Preço do Booster" aqui!)*
+- `Valor da Inscrição (R$)` e `Staff e Juízes (%)`: Usados para calcular a arrecadação e descontar a equipe, formando o nosso **Pool de Crédito (R$)**. *(Diferente das outras calculadoras, não é preciso o "Preço do Booster" aqui!)*
 - `Tabela de Pontuação` e `Adicionar Pontuação Extra`: Funcionam exatamente como na calculadora 3, onde você informa a quantidade de jogadores que atingiram cada pontuação (incluindo empates).
 
 **Como é feito o cálculo:**
@@ -113,5 +113,5 @@ A grande diferença desta calculadora para a anterior é a precisão. Como estam
 
 1. **O Valor do Ponto em Dinheiro:** O sistema soma todos os pontos registrados na tabela e divide o **Pool de Crédito** por essa quantidade. Isso revela exatamente quantos Reais e centavos vale 1 ponto no torneio.
 2. **Distribuição Base (Centavos):** Cada jogador recebe sua pontuação multiplicada por esse "valor do ponto monetário". O sistema faz um corte nas casas decimais, arredondando tudo rigorosamente para baixo na segunda casa decimal (centavos), evitando que a loja pague mais dinheiro do que o arrecadado.
-3. **Distribuição de Trocos (Método do Maior Resto):** Como as dízimas periódicas podem fazer o total ficar alguns centavos abaixo do arrecadado, a calculadora usa o mesmo método de justiça da calculadora 3. Ela descobre qual grupo de jogadores perdeu a maior fração monetária no arredondamento inicial e entrega as "moedinhas de 1 centavo" que sobraram até a conta fechar de forma perfeita.
-4. **Caixa Final:** O sistema exibe o custo final em R$, que devido aos cálculos de alta precisão em centavos, baterá perfeitamente ou deixará no máximo alguns centavos residuais na **Sobra do Fundo (Caixa)**, blindando o caixa da sua loja contra furos!
+3. **Distribuição de Trocos (Método do Maior Resto):** Como as dízimas periódicas podem fazer o total ficar alguns centavos abaixo do arrecadado, a calculadora usa o mesmo método da calculadora 3. Ela descobre qual grupo de jogadores perdeu a maior fração monetária no arredondamento inicial e entrega o "crédido restante" que sobraria até a conta fechar de forma perfeita.
+4. **Caixa Final:** O sistema exibe o custo final em R$, que devido aos cálculos de alta precisão em centavos, fechará perfeitamente ou deixará no máximo alguns centavos residuais na **Sobra do Fundo (Caixa)**, blindando o caixa da sua loja contra furos!
