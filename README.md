@@ -1,4 +1,4 @@
-# tournament_boosters_calculador
+# tournament_boosters_calculator
 Uma ferramenta para calcular a distribuição de boosters (premiação) em torneios de card games, garantindo uma divisão que se adapta a diferentes categorias e quantidades de jogadores.
 
 ## Tipos de Calculadoras
@@ -8,7 +8,7 @@ O sistema conta com 4 tipos de calculadoras, cada uma desenvolvida para um forma
 ---
 
 ### 1. Calculadora para Torneios Gerais (Distribuição para o Top)
-**O que é:** Ideal para torneios mais competitivos. Esse modelo junta toda a premiação gerada pelas inscrições e foca na distribuição entre os jogadores que alcançarem as melhores colocações (como o Top 4 ou Top 8).
+**O que é:** Ideal para torneios mais competitivos. Esse modelo junta toda a premiação gerada pelas inscrições e foca na distribuição entre os jogadores que alcançarem as melhores colocações (como o Top 4 ou o Top 8).
 
 **Inputs (Como usar):**
 - `Inscritos Masters`, `Seniors` e `Juniors`: Quantidade de jogadores inscritos em cada categoria. A soma deles forma o total de jogadores, e a proporção de cada um define qual a fatia do pool de premiação destinada a cada grupo.
@@ -76,7 +76,7 @@ Primeiro, a calculadora faz a **Arrecadação Total** multiplicando o número de
      - **5º ao 8º Lugares:** ~2.6% cada
 
    * **Correção de Arredondamento:** Se os arredondamentos para cima tentarem distribuir mais boosters do que o *Pool* da categoria permite, o algoritmo deduz a diferença das premiações menores até que o fechamento chegue exatamente no estoque reservado.
-4. **Sobras de Estoque:** No final, a calculadora checa se a soma de tudo o que foi distribuído bate com o seu estoque inicial e mostra direitinho quantos boosters sobraram (ou te avisa se você tentar dar mais prêmios do que realmente tem disponíveis).
+4. **Sobras de Estoque:** No final, a calculadora verifica se a soma de tudo o que foi distribuído bate com o seu estoque inicial e mostra direitinho quantos boosters sobraram (ou te avisa se você tentar dar mais prêmios do que realmente tem disponíveis).
 
 ---
 
